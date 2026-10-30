@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "VoltLink",
+    "name": "Pluggie",
     "slug": "esp32-controller-mobile",
     "scheme": "voltlink",
     "version": "1.0.0",
@@ -14,7 +14,8 @@
         "NSLocalNetworkUsageDescription": "Connect to your ESP32 to monitor energy and control its relay.",
         "NSAppTransportSecurity": {
           "NSAllowsLocalNetworking": true
-        }
+        },
+        "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
@@ -40,7 +41,14 @@
             "usesCleartextTraffic": true
           }
         }
-      ]
-    ]
+      ],
+      "expo-status-bar"
+    ],
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "df6eba88-d56d-4a39-8b66-aef71acd2f03"
+      }
+    }
   }
 }

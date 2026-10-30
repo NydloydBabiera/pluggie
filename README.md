@@ -1,4 +1,4 @@
-# VoltLink
+# Pluggie
 
 React Native + Expo energy monitor for Android, iOS, and web. Includes relay control, voltage (V), current (A), active power (watts), cumulative energy (kWh), local timestamped history, date filtering, report summaries, and CSV export. Watts are the unit of power, so they appear together.
 
@@ -16,6 +16,20 @@ npm test
 ```
 
 Scan the development QR code using a compatible Expo Go version. For native networking configuration, use a development build (`npx expo run:android` or `npx expo run:ios`, with the relevant native toolchain). iOS compilation requires macOS or an EAS cloud build. No cloud account is required for demo mode or local device communication.
+
+## Android APK and iOS builds
+
+Cloud builds use the profiles in `eas.json`. Sign in to your Expo account first:
+
+```sh
+npx eas-cli@latest login
+npx eas-cli@latest build --platform android --profile preview
+npx eas-cli@latest build --platform ios --profile preview
+```
+
+The preview Android build produces an installable APK. The preview iOS build produces an IPA for registered devices and requires a paid Apple Developer account. Register iPhones with `npx eas-cli@latest device:create` before building. EAS prompts to link or create the Expo project and configure signing credentials on the first build. Download completed builds from the URLs printed by EAS.
+
+For Google Play (AAB) or Apple TestFlight/App Store (IPA), use `--profile production` instead. Building does not submit the app to a store.
 
 ## Connect the ESP32
 
@@ -58,3 +72,23 @@ API references: [Expo SDK](https://docs.expo.dev/versions/latest/), [PZEM librar
 ## Validation and release limits
 
 Protocol/report tests, TypeScript, lint, SDK dependency alignment, and Android/iOS/web JavaScript bundle export are checked. Native APK/IPA compilation and physical ESP32/sensor testing require your hardware and build environment. Dependency installation currently reports 29 audit findings (11 moderate, 18 high); review and resolve relevant transitive dependency advisories before production release. No forced major dependency upgrades have been applied.
+
+## Online API and offline ESP8266 modes
+
+In Device settings, disable Demo mode, choose Online or Offline, then Save & connect.
+
+Online defaults to https://pluggie-api.onrender.com. It receives readings only through Socket.IO event readings:update (path /socket.io). The live event sends flat measurements (relay state arrives separately):
+
+```json
+{"voltage":220.9,"current":0,"power":0,"energy":0.001,"frequency":60.1,"powerFactor":0}
+```
+
+Relay commands POST /api/relay with {"state":"on"} or {"state":"off"}. Relay responses use {"ok":true,"state":"off"} (or "on"). The app validates ok and state separately from sensor telemetry, then updates the displayed relay state without fetching or recording sensor readings. Offline polling reads relay state from /status; a relay response is never recorded as a sensor measurement. Socket.IO reconnects automatically and waits for the next readings event. Online mode makes no readings GET requests on connect, reconnect, timers, or relay commands. The sampling interval applies only to Offline and Demo modes. Online requests allow 20 seconds, local requests 5 seconds.
+
+Offline uses the configured ESP8266 address: GET /readings for measurements, GET /status for relay state, and POST /relay for commands. The local command body currently uses the same state format. Local readings may be flat or nested under readings; status accepts relayState/state with on/off strings, or relay with a boolean. Adjust these adapters if the firmware differs. No internet is required; the phone must reach the board over Wi-Fi.
+
+API and board tokens are separate. HTTP uses Bearer tokens and Socket.IO uses auth.token. Online and offline histories are separate. Mode selection is explicit and commands do not automatically fall back to another connection. Frequency and power factor appear when provided. Existing saved empty API addresses and the former readings event migrate to these defaults.
+
+The bundled Arduino sketch and the earlier ESP32 setup/HTTP contract describe the legacy example firmware; they do not implement the current ESP8266 endpoints. Use your ESP8266 firmware for Offline mode. Browser access also requires compatible CORS and network origins. Native networking and recording pause while the app is backgrounded.
+
+Socket.IO also emits `relay:update` with `{"state":"off"}` or `{"state":"on"}`. Readings display immediately without waiting for relay state; an unknown relay displays as unknown until reported. Nested readings payloads remain supported. The client uses WebSocket transport with a 20-second connection timeout.
