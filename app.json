@@ -1,7 +1,8 @@
 {
   "expo": {
-    "name": "Pluggie",
-    "slug": "esp32-controller-mobile",
+    "name": "pluggie",
+    "slug": "pluggie",
+    "owner": "nydyybabiera",
     "scheme": "voltlink",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -45,9 +46,13 @@
       "expo-status-bar"
     ],
     "extra": {
-      "router": {},
+      "router": {
+        "asyncRoutes": {
+          "web": true
+        }
+      },
       "eas": {
-        "projectId": "df6eba88-d56d-4a39-8b66-aef71acd2f03"
+        "projectId": "5c566e25-0c04-43e6-b68f-b0dea60a893a"
       }
     }
   }

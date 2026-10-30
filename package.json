@@ -1,5 +1,5 @@
 {
-  "name": "esp32-controller-mobile",
+  "name": "pluggie",
   "version": "1.0.0",
   "main": "expo-router/entry",
   "dependencies": {
